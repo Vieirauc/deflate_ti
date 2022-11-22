@@ -8,7 +8,7 @@ from huffmantree import HuffmanTree
 
 class GZIPHeader:
 	''' class for reading and storing GZIP header fields '''
-	# olaaaaaaaaa
+	# olaaaaaaaaaa
 
 	ID1 = ID2 = CM = FLG = XFL = OS = 0
 	MTIME = []
