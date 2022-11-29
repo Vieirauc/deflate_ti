@@ -3,12 +3,13 @@
 # Teoria da Informacao, LEI, 2022
 
 import sys
+import numpy as np
 from huffmantree import HuffmanTree
+from huffmancodec import HuffmanCodec
 
 
 class GZIPHeader:
 	''' class for reading and storing GZIP header fields '''
-
 
 	ID1 = ID2 = CM = FLG = XFL = OS = 0
 	MTIME = []
@@ -162,18 +163,21 @@ class GZIP:
 			
 									
 			#--- STUDENTS --- ADD CODE HERE
-			HLIT , HDIST , HCLEN = self.read_block_format()
-
-			
-
-
-			
-			
+			HLIT = self.readBits(5)
+			HDIST = self.readBits(5)
+			HCLEN = self.readBits(4)
+			comp = np.zeros(19)
+			for i in range(HCLEN+4):
+				alfabeto_comp = [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15]
+				value = self.readBits(3)
+				comp[alfabeto_comp[i]] = value
 	
+			print(comp)
 			
 																																								
 			# update number of blocks read
 			numBlocks += 1
+			print("numBlocks =", numBlocks)
 		
 
 		
