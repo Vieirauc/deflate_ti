@@ -253,4 +253,6 @@ if __name__ == '__main__':
 	# decompress file
 	gz = GZIP(fileName)
 	gz.decompress()
+
+	#iwbilva
 	
