@@ -231,15 +231,13 @@ class GZIP:
 			self.available_bits -= n
 
 		return value
-
-	#ex1
+	
 	def read_block_format(self):
 		HLIT = self.readBits(5)
 		HDIST = self.readBits(5)
 		HCLEN = self.readBits(4)
 		return HLIT, HDIST, HCLEN
 
-	#teste para o joao ver
 	
 
 
@@ -255,4 +253,4 @@ if __name__ == '__main__':
 	gz.decompress()
 
 	#iwbilva
-	
+	##pila
