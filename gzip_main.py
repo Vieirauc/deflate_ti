@@ -161,42 +161,13 @@ class GZIP:
 			
 									
 			#--- STUDENTS --- ADD CODE HERE
-			HLIT = self.readBits(5)
-			HDIST = self.readBits(5)
-			HCLEN = self.readBits(4)
-			print("HCLEN: ", HCLEN)
-			comp = np.zeros(19, dtype=int)
-			for i in range(HCLEN+4):
-				alfabeto_comp = [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15]
-				value = self.readBits(3)
-				comp[alfabeto_comp[i]] = value
-			print(comp)
-
-			bl_count = np.zeros(19, dtype=int)
-
-			for i in comp:
-				bl_count[int(i)] += 1
-
-			print(bl_count)
-
-			code = 0
-			bl_count[0] = 0
-			next_code = np.zeros(19, dtype=int)
-
-			for bits in range(1, 19):
-				code = (code + bl_count[bits-1]) << 1
-				next_code[bits] = code
-
-			print(next_code)
-
-			for i in range(len(comp)):
-				leng = comp[i]
-				if leng != 0:
-					comp[i] = next_code[leng]
-					next_code[leng] += 1
 			
-			print(comp)
-																																						
+			HLIT, HDIST, HCLEN = self.read_block_info()
+
+			comp = self.code_lengths(HCLEN)
+
+			self.huff_converter(comp)
+
 			# update number of blocks read
 			numBlocks += 1
 			print("numBlocks =", numBlocks)
@@ -207,8 +178,55 @@ class GZIP:
 		
 		self.f.close()	
 		print("End: %d block(s) analyzed." % numBlocks)
-	
-	
+
+	#Ex 1
+	def read_block_info(self):
+		HLIT = self.readBits(5)
+		HDIST = self.readBits(5)
+		HCLEN = self.readBits(4)
+		print("HCLEN:", HCLEN, "HLIT:", HLIT, "HDIST:", HDIST)
+		return HLIT, HDIST, HCLEN
+
+	#Ex 2
+	def code_lengths(self, HCLEN):
+		comp = np.zeros(19, dtype=int)
+		for i in range(HCLEN+4):
+			alfabeto_comp = [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15]
+			value = self.readBits(3)
+			comp[alfabeto_comp[i]] = value
+
+		print("comp:",comp)
+		return comp
+
+	#Ex 3
+	def huff_converter(self, comp):
+		bl_count = np.zeros(19, dtype=int)
+
+		for i in comp:
+			bl_count[int(i)] += 1
+
+		print("bl_count:",bl_count)
+
+		code = 0
+		bl_count[0] = 0
+		next_code = np.zeros(19, dtype=int)
+
+		for bits in range(1, 19):
+			code = (code + bl_count[bits-1]) << 1
+			next_code[bits] = code
+
+		print("next_code:",next_code)
+
+		for i in range(len(comp)):
+			leng = comp[i]
+			if leng != 0:
+				comp[i] = next_code[leng]
+				next_code[leng] += 1
+		
+		print("comp final:",comp)
+		return comp
+
+
 	def getOrigFileSize(self):
 		''' reads file size of original file (before compression) - ISIZE '''
 		
@@ -229,7 +247,6 @@ class GZIP:
 		return sz		
 	
 
-	
 	def getHeader(self):  
 		''' reads GZIP header'''
 
