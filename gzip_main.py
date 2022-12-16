@@ -31,10 +31,6 @@ class GZIPHeader:
 		
 	# if FLG_HCRC == 1
 	HCRC = []
-		
-	input = []
-	output = []
-		
 	
 	def read(self, f):
 		''' reads and processes the Huffman header from file. Returns 0 if no error, -1 otherwise '''
@@ -272,7 +268,6 @@ class GZIP:
 					print("value dist: ", value)
 					distance = distance_base[value] + self.readBits(extra_bits_dist[value])
 					print("distance: ", distance)
-
 					if distance < len(decompressed):
 						for i in range(length):
 							print("decompressed len:",len(decompressed))
