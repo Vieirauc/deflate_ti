@@ -174,7 +174,7 @@ class GZIP:
 
 			for i in range(len(comp_list)):
 				if comp_list[i] != '':
-					hft.addNode(comp_list[i], i, True)
+					hft.addNode(comp_list[i], i)
 
 			lengths_hlit = []
 			pos = 0
@@ -222,8 +222,8 @@ class GZIP:
 
 			print("lengths_hdist: ", lengths_hdist)
 
-			hlit_huff = self.huff_converter(lengths_hlit, 288)
-			hdist_huff = self.huff_converter(lengths_hdist, 32)
+			hlit_huff = self.huff_converter(lengths_hlit, 285)
+			hdist_huff = self.huff_converter(lengths_hdist, 30)
 
 			print(hlit_huff)
 			print(hdist_huff)
@@ -233,54 +233,58 @@ class GZIP:
 
 			for i in range(len(hlit_huff)):
 				if hlit_huff[i] != '':
-					hft_lits.addNode(hlit_huff[i], i, True)
+					hft_lits.addNode(hlit_huff[i], i)
+					
 			for i in range(len(hdist_huff)):
 				if hdist_huff[i] != '':
-					hft_dist.addNode(hdist_huff[i], i, True)
+					hft_dist.addNode(hdist_huff[i], i)
 
 			decompressed = []
-			pos = 0
 			length_base = [3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31, 35, 43, 51, 59, 67, 83, 99, 115, 131, 163, 195, 227, 258]
 			extra_bits = [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0]
 			distance_base = [1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513, 769, 1025, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577]
 			extra_bits_dist = [0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 0]
 
 			while(True):
-				bit = str(self.readBits(1))
-				value = hft_lits.nextNode(bit)
+				value = -1
+				value1 = -1
 				while(value < 0):
 					bit = str(self.readBits(1))
 					value = hft_lits.nextNode(bit)
+				hft_lits.resetCurNode()
 				if value < 256:
-					print("value literal: ", value)
+					#print("value literal: ", value)
 					decompressed.append(value)
 				elif value == 256:
 					break
 				elif value > 256:
 					length = length_base[value - 257] + self.readBits(extra_bits[value - 257])
-					print("value: ", value)
-					print("length: ", length)
-					bit = str(self.readBits(1))
-					value = hft_dist.nextNode(bit)
-					while(value < 0):
+					#print("value: ", value)
+					#print("length: ", length)
+					while(value1 < 0):
 						bit = str(self.readBits(1))
-						value = hft_dist.nextNode(bit)
-					print("value dist: ", value)
-					distance = distance_base[value] + self.readBits(extra_bits_dist[value])
-					print("distance: ", distance)
+						value1 = hft_dist.nextNode(bit)
+					hft_dist.resetCurNode()
+					#print("value dist: ", value1)
+					distance = distance_base[value1] + self.readBits(extra_bits_dist[value1])
+					#print("distance: ", distance)
+
 					if distance < len(decompressed):
 						for i in range(length):
-							print("decompressed len:",len(decompressed))
-							print("difference:",len(decompressed) - distance)
+							#print("decompressed len:",len(decompressed))
+							#print("difference:",len(decompressed) - distance)
 							decompressed.append(decompressed[len(decompressed) - distance])
 
-				hft_dist.resetCurNode()
-				hft_lits.resetCurNode()
 
 			print("decompressed: ", decompressed)
+			#decompressed = [13, 10, 9, 9, 70, 114, 101, 113, 117, 101, 110, 116, 108, 121, 32, 65]
+			with open("final.txt", "wb") as f:
+				f.write(bytes(decompressed))
+
 			for i in range(len(decompressed)):
 				decompressed[i] = "{:08b}".format(decompressed[i])
-			#print("decompressed: ", decompressed)
+			
+			
 
 			output = ""
 			'''
@@ -330,6 +334,8 @@ class GZIP:
 
 	#Ex 3
 	def huff_converter(self, comp, size):
+		values_list = np.zeros(size, dtype=int)
+
 		bl_count = np.zeros(size, dtype=int)
 
 		for i in comp:
@@ -345,22 +351,20 @@ class GZIP:
 			code = (code + bl_count[bits-1]) << 1
 			next_code[bits] = code
 
-		print("next_code:",next_code)
-
-		comp_list = []
+		bin_list = []
 
 		for i in range(len(comp)):
 			leng = comp[i]
 			if leng != 0:
-				comp[i] = next_code[leng]
-				comp_list.append('{:03b}'.format(next_code[leng]))
+				values_list[i] = next_code[leng]
+				bin_list.append(format(next_code[leng], 'b').zfill(comp[i]))
 				next_code[leng] += 1
 			else:
-				comp_list.append('')
+				bin_list.append('')
 		
 		print("comp final:",comp)
-		print("comp list:",comp_list)
-		return comp_list
+		print("bin list:",bin_list)
+		return bin_list
 
 	#Ex 4
 	def read_lit_len(self, HLIT):
