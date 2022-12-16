@@ -4,6 +4,7 @@
 
 import sys
 import numpy as np
+from huffmantree import HuffmanTree
 
 
 class GZIPHeader:
@@ -151,6 +152,8 @@ class GZIP:
 		# MAIN LOOP - decode block by block
 		BFINAL = 0	
 		while not BFINAL == 1:	
+
+
 			
 			BFINAL = self.readBits(1)
 							
@@ -161,12 +164,25 @@ class GZIP:
 			
 									
 			#--- STUDENTS --- ADD CODE HERE
+
+			hft = HuffmanTree()
 			
 			HLIT, HDIST, HCLEN = self.read_block_info()
 
 			comp = self.code_lengths(HCLEN)
 
-			self.huff_converter(comp)
+
+
+			comp , comp_list = self.huff_converter(comp)
+
+			for i in range(len(comp_list)):
+				if comp_list[i] != '':
+					hft.addNode(comp_list[i], i, True)
+
+			#function that reads and stores the HLIT + 257 in an array code lengths referring to the alphabet of literals/lengths
+			lit_len = self.read_lit_len(HLIT)
+			print("lit_len:", lit_len)
+
 
 			# update number of blocks read
 			numBlocks += 1
@@ -217,15 +233,57 @@ class GZIP:
 
 		print("next_code:",next_code)
 
+		comp_list = []
+
 		for i in range(len(comp)):
 			leng = comp[i]
 			if leng != 0:
 				comp[i] = next_code[leng]
+				comp_list.append('{:03b}'.format(next_code[leng]))
 				next_code[leng] += 1
+			else:
+				comp_list.append('')
 		
 		print("comp final:",comp)
-		return comp
+		print("comp list:",comp_list)
+		return comp, comp_list
+	
+	def read_lit_len(self, HLIT):
+		lit_len = np.zeros(HLIT+257, dtype=int)
+		for i in range(HLIT+257):
+			lit_len[i] = self.readBits(4)
+			
+		return lit_len
+	
+	def search_bit_by_bit(buffer, verbose=False, hft=None):
 
+		lv = 0
+		l = len(buffer)
+		terminate = False
+		code = ""
+
+		while not terminate and lv < l:
+			
+			nextBit = buffer[lv]
+			code = code + nextBit
+			
+			pos = hft.nextNode(nextBit)
+						
+			if pos != -2:
+				terminate = True
+			else:
+				lv = lv + 1
+
+		if verbose:
+			if pos == -1:
+				print("Code '" + buffer + "' not found!!!")
+			elif pos == -2:
+				print("Code '" + buffer + "': not found but prefix!!!")
+			else:
+				print("Code '" + buffer + "' found, alphabet position: " + str(pos) )
+
+		return pos	
+			
 
 	def getOrigFileSize(self):
 		''' reads file size of original file (before compression) - ISIZE '''
