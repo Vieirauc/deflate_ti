@@ -179,9 +179,10 @@ class GZIP:
 				if comp_list[i] != '':
 					hft.addNode(comp_list[i], i, True)
 
+			
+
 			#function that reads and stores the HLIT + 257 in an array code lengths referring to the alphabet of literals/lengths
 			lit_len = self.read_lit_len(HLIT)
-			print("lit_len:", lit_len)
 
 
 			# update number of blocks read
@@ -247,13 +248,15 @@ class GZIP:
 		print("comp final:",comp)
 		print("comp list:",comp_list)
 		return comp, comp_list
-	
+
+	#Ex 4
 	def read_lit_len(self, HLIT):
 		lit_len = np.zeros(HLIT+257, dtype=int)
 		for i in range(HLIT+257):
-			lit_len[i] = self.readBits(4)
-			
+			self.readBits(1)
+		print("lit_len:",lit_len)
 		return lit_len
+
 	
 	def search_bit_by_bit(buffer, verbose=False, hft=None):
 
