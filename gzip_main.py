@@ -415,36 +415,6 @@ class GZIP:
 			self.available_bits -= n
 
 		return value
-	
-
-def search_bit_by_bit(buffer, hft, verbose=False):
-
-		lv = 0
-		l = len(buffer)
-		terminate = False
-		code = ""
-
-		while not terminate and lv < l:
-			
-			nextBit = buffer[lv]
-			code = code + nextBit
-			
-			pos = hft.nextNode(nextBit)
-						
-			if pos != -2:
-				terminate = True
-			else:
-				lv = lv + 1
-
-		if verbose:
-			if pos == -1:
-				print("Code '" + buffer + "' not found!!!")
-			elif pos == -2:
-				print("Code '" + buffer + "': not found but prefix!!!")
-			else:
-				print("Code '" + buffer + "' found, alphabet position: " + str(pos) )
-
-		return pos
 
 
 if __name__ == '__main__':
