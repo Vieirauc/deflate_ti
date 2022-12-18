@@ -219,8 +219,8 @@ class GZIP:
 	#Retorna o array com os comrpimentos na ordem correta
 	def code_lengths(self, HCLEN):
 		comp = np.zeros(19, dtype=int)
+                alfabeto_comp = [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15]
 		for i in range(HCLEN+4):
-			alfabeto_comp = [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15]
 			value = self.readBits(3)
 			comp[alfabeto_comp[i]] = value
 		print("comp:",comp)
