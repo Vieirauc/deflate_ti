@@ -219,8 +219,8 @@ class GZIP:
 	#Retorna o array com os comrpimentos na ordem correta
 	def code_lengths(self, HCLEN):
 		comp = np.zeros(19, dtype=int)
+		alfabeto_comp = [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15]
 		for i in range(HCLEN+4):
-			alfabeto_comp = [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15]
 			value = self.readBits(3)
 			comp[alfabeto_comp[i]] = value
 		print("comp:",comp)
@@ -344,7 +344,7 @@ class GZIP:
 		while(True):
 			value = -1
 			value1 = -1
-			#Percorre a árvore de huffman até encontrar uma folha
+			#Percorre a árvore de huffman de comp/lits até encontrar uma folha
 			while(value < 0):
 				bit = str(self.readBits(1))
 				value = hft_lits.nextNode(bit)
@@ -358,6 +358,7 @@ class GZIP:
 			#Calcula o comprimento do código e a distância com base nas tabelas de bits extra
 			elif value > 256:
 				length = self.length_base[value - 257] + self.readBits(self.extra_bits[value - 257])
+				#Percorre a árvore de huffman de distâncias até encontrar uma folha
 				while(value1 < 0):
 					bit = str(self.readBits(1))
 					value1 = hft_dist.nextNode(bit)
@@ -370,7 +371,6 @@ class GZIP:
 		
 		return decompressed
 			
-
 
 	def getOrigFileSize(self):
 		''' reads file size of original file (before compression) - ISIZE '''
